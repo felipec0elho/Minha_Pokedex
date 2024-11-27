@@ -2,6 +2,7 @@ package com.example.minhapokedex.view
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,17 +22,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
+import com.example.minhapokedex.data.FavCard
 import com.example.minhapokedex.model.RetrofitInstance
 import com.example.minhapokedex.model.Root
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 
 @Composable
-fun Pokedex() {
+fun Pokedex(navController: NavController) {
     var cardImg by remember { mutableStateOf("") }
+    var pokemonId by remember { mutableStateOf("") }
     var pokemonName by remember { mutableStateOf("") }
     var showShareButton by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -57,12 +64,19 @@ fun Pokedex() {
                 override fun onResponse(call: Call<Root>, response: Response<Root>) {
                     if (response.isSuccessful) {
                         val card = response.body()?.data?.firstOrNull()
-                        cardImg = card?.images?.large ?: ""
-                        showShareButton = cardImg.isNotEmpty()
+                        if (card != null) {
+                            pokemonId = card.id
+                            cardImg = card.images.large ?: ""
+                            showShareButton = cardImg.isNotEmpty()
+                        }else {
+                            Log.e("Pokedex", "Nenhum card encontrado.")
+                        }
+                    }else {
+                        Log.e("Pokedex", "Erro na resposta da API: ${response.message()}")
                     }
                 }
                 override fun onFailure(call: Call<Root>, t: Throwable) {
-                    // Handle failure
+                    Log.e("Pokedex", "Falha na chamada da API: ${t.message}")
                 }
             })
         }) {
@@ -75,17 +89,31 @@ fun Pokedex() {
                 contentDescription = null,
                 modifier = Modifier.size(400.dp)
             )
+            Button(onClick = {
+                if (pokemonId.isNotEmpty() && pokemonName.isNotEmpty() && cardImg.isNotEmpty()) {
+                    val favCard = FavCard(id = pokemonId, name = pokemonName, imageUrl = cardImg)
+
+                    CoroutineScope(Dispatchers.IO).launch {
+
+                    }
+                } else {
+                    Log.e("Pokedex", "Favoritar falhou: pokemonId ou pokemonName está vazio.")
+                }
+            }) {
+                Text("Favoritar")
+            }
+
             if (showShareButton) {
                 Button(onClick = { shareImage(cardImg, context) }) {
                     Text("Compartilhar")
                 }
             }
+            Button(onClick = { navController.navigate("favorites") }) { // Navegação para Favoritos.
+                Text("Ver Favoritos")
+            }
         }
     }
 }
-
-
-
 
 fun shareImage(imageUrl: String, context: Context) {
     val intent = Intent().apply {

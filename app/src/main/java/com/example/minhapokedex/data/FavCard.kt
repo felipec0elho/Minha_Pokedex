@@ -1,4 +1,4 @@
-package com.example.minhapokedex.model
+package com.example.minhapokedex.data
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 @Entity(tableName = "favorites")
