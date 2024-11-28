@@ -34,18 +34,5 @@ class MainActivity : ComponentActivity() {
             composable("PokeScreen") { PokeScreen(navController) }
             composable("favorites") { FavoritesScreen(viewModel, navController) }
         }
-
-//        NavHost(navController, startDestination = "PokeScreen") {
-//            composable(
-//                route = "PokeScreen"
-//            ) {
-//                PokeScreen(navController)
-//            }
-//            composable(
-//                    route = "FavoritesScreen"
-//                    ) {
-//                FavoritesScreen(viewModel,navController)
-//            }
-//        }
     }
 }
