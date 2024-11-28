@@ -22,9 +22,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.minhapokedex.data.FavCard
+import com.example.minhapokedex.data.PokeViewModel
 import com.example.minhapokedex.model.RetrofitInstance
 import com.example.minhapokedex.model.Root
 import kotlinx.coroutines.CoroutineScope
@@ -36,7 +38,7 @@ import retrofit2.Response
 
 
 @Composable
-fun Pokedex(navController: NavController) {
+fun PokeScreen(navController: NavController) {
     var cardImg by remember { mutableStateOf("") }
     var pokemonId by remember { mutableStateOf("") }
     var pokemonName by remember { mutableStateOf("") }
@@ -85,16 +87,21 @@ fun Pokedex(navController: NavController) {
 
         if (cardImg.isNotEmpty()) {
             Image(
-                painter = rememberImagePainter (cardImg),
+                painter = rememberImagePainter(cardImg),
                 contentDescription = null,
                 modifier = Modifier.size(400.dp)
             )
             Button(onClick = {
                 if (pokemonId.isNotEmpty() && pokemonName.isNotEmpty() && cardImg.isNotEmpty()) {
                     val favCard = FavCard(id = pokemonId, name = pokemonName, imageUrl = cardImg)
-
+                    val viewModel = PokeViewModel()
                     CoroutineScope(Dispatchers.IO).launch {
-
+                        try {
+                            viewModel.insert(favCard) // Usando o ViewModel para inserir o card favorito.
+                            Log.d("Pokedex", "Card favoritado: $favCard")
+                        } catch (e: Exception) {
+                            Log.e("Pokedex", "Erro ao inserir card favorito: ${e.message}")
+                        }
                     }
                 } else {
                     Log.e("Pokedex", "Favoritar falhou: pokemonId ou pokemonName está vazio.")
@@ -102,6 +109,7 @@ fun Pokedex(navController: NavController) {
             }) {
                 Text("Favoritar")
             }
+
 
             if (showShareButton) {
                 Button(onClick = { shareImage(cardImg, context) }) {

@@ -4,6 +4,10 @@ import android.app.Application
 import androidx.room.Room
 
 class PokeApplication : Application() {
+    companion object {
+        lateinit var instance: PokeApplication
+            private set
+    }
 
     lateinit var database : AppDatabase
         private set
@@ -16,8 +20,5 @@ class PokeApplication : Application() {
             .build()
     }
 
-    companion object {
-        lateinit var instance: PokeApplication
-            private set
-    }
+
 }
